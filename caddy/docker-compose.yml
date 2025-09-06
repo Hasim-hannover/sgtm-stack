@@ -1,36 +1,40 @@
+cd ~/sgtm-stack/caddy
+cat > docker-compose.yml <<'YML'
+version: "3.9"
+
 services:
   sgtm:
-    image: gcr.io/cloud-tagging-10302018/gtm-cloud-run/serve
-    restart: unless-stopped
+    image: gcr.io/cloud-tagging-10302018/gtm-cloud-image:stable
+    container_name: sgtm
     environment:
-      PORT: "8080"
-      CONTAINER_CONFIG: "/workspace/container-config.json"
-      WORKERS: "4"
-    volumes:
-      - ./config:/workspace:ro
-    networks: [sgtm]
+      CONTAINER_CONFIG: ${CONTAINER_CONFIG}   # kommt aus .env
+      RUN_AS_UID: 0
+      RUN_AS_GID: 0
+    expose:
+      - "8080"
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:8080/healthz"]
       interval: 30s
       timeout: 3s
       retries: 5
+    restart: unless-stopped
 
   caddy:
     image: caddy:2
-    restart: unless-stopped
-    depends_on: [sgtm]
+    container_name: caddy
+    depends_on:
+      - sgtm
     ports:
       - "80:80"
       - "443:443"
     volumes:
-      - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro   # <— Pfad-Fix (nicht ./caddy/…)
       - caddy_data:/data
       - caddy_config:/config
-    networks: [sgtm]
-
-networks:
-  sgtm:
+    restart: unless-stopped
 
 volumes:
   caddy_data:
   caddy_config:
+YML
+
