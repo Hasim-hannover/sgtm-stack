@@ -1,0 +1,5 @@
+# Keine Secrets ins Repo
+config/container-config.json
+.env
+# Editor/OS
+.DS_Store
