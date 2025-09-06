@@ -1,0 +1,36 @@
+services:
+  sgtm:
+    image: gcr.io/cloud-tagging-10302018/gtm-cloud-run/serve
+    restart: unless-stopped
+    environment:
+      PORT: "8080"
+      CONTAINER_CONFIG: "/workspace/container-config.json"
+      WORKERS: "4"
+    volumes:
+      - ./config:/workspace:ro
+    networks: [sgtm]
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8080/healthz"]
+      interval: 30s
+      timeout: 3s
+      retries: 5
+
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    depends_on: [sgtm]
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    networks: [sgtm]
+
+networks:
+  sgtm:
+
+volumes:
+  caddy_data:
+  caddy_config:
