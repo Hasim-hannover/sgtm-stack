@@ -1,0 +1,14 @@
+sgtm2.deinedomain.de {
+    encode gzip
+    header {
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "SAMEORIGIN"
+        Referrer-Policy "strict-origin-when-cross-origin"
+    }
+    reverse_proxy sgtm:8080 {
+        header_up Host {host}
+        header_up X-Forwarded-For {remote}
+        header_up X-Forwarded-Proto {scheme}
+    }
+    log
+}
