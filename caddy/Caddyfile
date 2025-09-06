@@ -1,4 +1,4 @@
-sgtm2.deinedomain.de {
+track.hasimuener.de {
     encode gzip
     header {
         X-Content-Type-Options "nosniff"
